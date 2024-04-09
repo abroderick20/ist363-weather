@@ -17,6 +17,8 @@ const Homepage = () => {
   const [weatherData, setWeatherData] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [daysOfWeek, setDaysOfWeek] = useState([]);
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
 
   const peopleArr = getPeople();
   useEffect(() => {
@@ -39,6 +41,19 @@ const Homepage = () => {
     location ? fetchData() : null;
   }, [location]);
 
+  useEffect(() => {
+    weatherData &&
+      weatherData.list.filter((block) => {
+        const date = new Date(block.dt * 1000);
+        const options = { weekday: "short" };
+        const day = date.toLocaleDateString("en-US", options);
+        if (!tempWeek.includes(day)) {
+          tempWeek.push(day);
+        }
+      });
+    setDaysOfWeek(tempWeek);
+  }, [weatherData]);
+
   return (
     <div>
       <h1>Weather app</h1>
@@ -46,6 +61,7 @@ const Homepage = () => {
       {weatherData && (
         <div>
           <h2>{weatherData.city.name}</h2>
+
           <p>Current temp: {weatherData.list[0].main.temp}&deg; F</p>
           <p>{weatherData.list[0].weather[0].description}</p>
           <Image
@@ -55,6 +71,16 @@ const Homepage = () => {
             height={100}
           />
         </div>
+      )}
+      {daysOfWeek && (
+        <section>
+          <ul>
+            {daysOfWeek.map((day, index) => {
+              return <li key={index}>{day}</li>;
+            })}
+          </ul>
+          <div>{weatherData.list.filter()}</div>
+        </section>
       )}
     </div>
   );
