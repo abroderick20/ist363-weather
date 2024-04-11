@@ -42,6 +42,7 @@ const Homepage = () => {
   }, [location]);
 
   useEffect(() => {
+    const tempWeek = [];
     weatherData &&
       weatherData.list.filter((block) => {
         const date = new Date(block.dt * 1000);
@@ -79,7 +80,16 @@ const Homepage = () => {
               return <li key={index}>{day}</li>;
             })}
           </ul>
-          <div>{weatherData.list.filter()}</div>
+          <div>
+            {weatherData?.list
+              .filter((block) => {
+                const date = new Date(block.dt * 1000);
+                const options = { weekday: "short" };
+                const day = date.toLocaleDateString("en-US", options);
+                return day == dayOfWeek[activeDayIndex];
+              })
+              .map((block, index) => {})}
+          </div>
         </section>
       )}
     </div>
