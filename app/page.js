@@ -4,28 +4,27 @@ import { useState, useEffect } from "react";
 
 import Image from "next/image";
 
-import ButtonDemo from "../components/List";
-import ButtonDemo from "../components/Row";
-import ButtonDemo from "../components/Col";
-import ButtonDemo from "../components/ButtonDemo";
-import ColorPicker from "../components/ColorPicker";
-import PeoplePicker from "../components/PeoplePicker";
+import Button from "../components/Button";
+import Col from "../components/Col";
+import Container from "../components/Container";
+import List from "../components/List";
+import Row from "../components/Row";
+import Section from "../components/Section";
 import Tabs from "../components/Tabs";
+import Temp from "../components/Temp";
+import OutfitSuggester from "../components/OutfitSuggester";
 
-import {
-  getGeoLocation,
-  getPeople,
-  getWeatherData,
-  getWeatherDataByLatLon,
-} from "../lib/api";
+import { getGeoLocation, getPeople, getWeatherDataByLatLon } from "../lib/api";
+
 const Homepage = () => {
+  const [loading, setLoading] = useState(true);
   const [weatherData, setWeatherData] = useState(null);
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const [daysOfWeek, setDaysOfWeek] = useState([]);
+  const [daysOfWeek, setDaysOfWeek] = useState(null);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
+  const [tempUnit, setTempUnit] = useState("imperial");
 
-  const peopleArr = getPeople();
   useEffect(() => {
     getGeoLocation()
       .then((position) => {
@@ -41,66 +40,87 @@ const Homepage = () => {
     const fetchData = async () => {
       const response = await getWeatherDataByLatLon(location);
       setWeatherData(response);
+      setLoading(false);
     };
-
     location ? fetchData() : null;
   }, [location]);
 
   useEffect(() => {
+    // filter out the days of the week
     const tempWeek = [];
+
     weatherData &&
       weatherData.list.filter((block) => {
         const date = new Date(block.dt * 1000);
         const options = { weekday: "short" };
         const day = date.toLocaleDateString("en-US", options);
+
         if (!tempWeek.includes(day)) {
           tempWeek.push(day);
         }
       });
+
     setDaysOfWeek(tempWeek);
   }, [weatherData]);
 
-  return (
-    <div>
-      <h1>Weather app</h1>
-      {errorMsg && <div>{errorMsg}</div>}
-      {weatherData && (
-        <Row>
-          <Col>
-            <h2>{weatherData.city.name}</h2>
+  const temperature = weatherData ? weatherData.list[0].main.temp : null;
 
-            <p>Current temp: {weatherData.list[0].main.temp}&deg; F</p>
-            <p>{weatherData.list[0].weather[0].description}</p>
-            <Image
-              src={`https://openweathermap.org/img/wn/${weatherData.list[0].weather[0].icon}@2x.png`}
-              alt={`Weather icon`}
-              width={100}
-              height={100}
-            />
-          </Col>
-          <Col></Col>
-        </Row>
+  return (
+    <Section>
+      {errorMsg && <div>{errorMsg}</div>}
+      {loading ? (
+        <Container>
+          <p>Loading...</p>
+        </Container>
+      ) : (
+        <Container>
+          <Row>
+            <Col sm={3} md={4}>
+              <h2>{weatherData.city.name}</h2>
+              <Temp
+                size="lg"
+                amount={weatherData.list[0].main.temp}
+                unit={tempUnit}
+              />
+              <p>{weatherData.list[0].weather[0].description}</p>
+              <Image
+                src={`https://openweathermap.org/img/wn/${weatherData.list[0].weather[0].icon}@2x.png`}
+                alt={`Weather icon for ${weatherData.list[0].weather[0].description}`}
+                width={100}
+                height={100}
+              />
+              <br />
+              <Button
+                label={`Change to ${
+                  tempUnit === "imperial" ? "celsius" : "fahrenheit"
+                }`}
+                clickHandler={() => {
+                  setTempUnit(tempUnit === "imperial" ? "metric" : "imperial");
+                }}
+              />
+              <OutfitSuggester temperature={temperature} />
+            </Col>
+            <Col sm={9} md={8}>
+              {weatherData && daysOfWeek && (
+                <section>
+                  <Tabs
+                    activeIndex={activeDayIndex}
+                    items={daysOfWeek}
+                    clickHandler={setActiveDayIndex}
+                  />
+                  <List
+                    activeIndex={activeDayIndex}
+                    items={weatherData.list}
+                    daysOfWeek={daysOfWeek}
+                    unit={tempUnit}
+                  />
+                </section>
+              )}
+            </Col>
+          </Row>
+        </Container>
       )}
-      {daysOfWeek && (
-        <section>
-          <Tabs
-            items={daysOfWeek}
-            clickHandler={setActiveDayIndex}
-            activeIndex={activeDayIndex}
-          />
-          <div>
-            {weatherData?.list
-              .filter((block) => {
-                const date = new Date(block.dt * 1000);
-                const options = { weekday: "short" };
-                const day = date.toLocaleDateString("en-US", options);
-                return day == daysOfWeek[activeDayIndex];
-              })
-              .map((block, index) => {})}
-          </div>
-        </section>
-      )}
-    </div>
+    </Section>
   );
 };
 export default Homepage;

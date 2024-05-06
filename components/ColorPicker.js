@@ -1,24 +1,42 @@
+// core imports
 import { useState } from "react";
+
+// custom components
 import Button from "./Button";
+
+// styles
 import styles from "./ColorPicker.module.scss";
 
 const colors = [
   {
     name: "red",
-    value: "#ff0000",
+    value: "#FF0000", // 0-9, A-F
   },
   {
     name: "green",
-    value: "#00ff00",
+    value: "#00FF00",
   },
   {
     name: "blue",
-    value: "#0000ff",
+    value: "#0000FF",
+  },
+  {
+    name: "yellow",
+    value: "#FFFF00",
+  },
+  {
+    name: "teal",
+    value: "#008080",
+  },
+  {
+    name: "orange",
+    value: "#FFA500",
   },
 ];
 
 const ColorPicker = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+
   return (
     <div className={styles.colorpicker}>
       <div

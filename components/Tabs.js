@@ -1,12 +1,13 @@
+import classnames from "classnames/bind";
+
 import styles from "./Tabs.module.scss";
-import classNames from "classnames/bind";
 
 const cx = classnames.bind(styles);
 
 const Tabs = ({ activeIndex, clickHandler, items }) => {
   return (
-    <ul class={styles.tabs}>
-      {items.map((item, index) => {
+    <ul className={styles.tabs}>
+      {items?.map((item, index) => {
         const itemClasses = cx({
           tabs__item: true,
           active: index === activeIndex,
@@ -26,5 +27,4 @@ const Tabs = ({ activeIndex, clickHandler, items }) => {
     </ul>
   );
 };
-
 export default Tabs;

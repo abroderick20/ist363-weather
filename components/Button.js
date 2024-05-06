@@ -13,5 +13,4 @@ const Button = ({ backgroundColor, clickHandler, label }) => {
     </button>
   );
 };
-
 export default Button;
